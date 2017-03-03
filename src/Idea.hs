@@ -3,13 +3,16 @@
 module Idea(module Idea, Note(..), showNotes, Severity(..)) where
 
 import Data.List.Extra
-import Data.Char
-import Numeric
+import Data.Char (toLower)
+import Data.Maybe (fromMaybe)
+import Data.Ord (comparing)
+import Data.Function (on)
 import HSE.All
 import Config.Type
 import HsColour
 import Refact.Types hiding (SrcSpan)
 import qualified Refact.Types as R
+import qualified Data.Map as Map
 
 
 -- | An idea suggest by a 'Hint'.
@@ -55,9 +58,41 @@ showIdeaJson idea@Idea{ideaSpan=srcSpan@SrcSpan{..}, ..} = wrap . intercalate ",
 showIdeasJson :: [Idea] -> String
 showIdeasJson ideas = "[" ++ intercalate "\n," (map showIdeaJson ideas) ++ "]"
 
+showFileCheckstyle :: [Idea] -> String
+showFileCheckstyle ideas = intercalate "\n"
+    [ "<file name='" ++ fName ideas ++ "'>"
+    , intercalate "\n" $ map showIdeaCheckstyle ideas
+    , "</file>\n"
+    ]
+    where fName = srcSpanFilename . ideaSpan . head
+          sanitize = concatMap (\c -> if c == '\'' then "\\'" else [c])
+          hintLn = sanitize . show . srcSpanStartLine . ideaSpan
+          hintSev i = case ideaSeverity i of
+              Ignore -> "ignore"
+              Suggestion -> "info"
+              Warning -> "warning"
+              Error -> "error"
+          hintTo i = case ideaTo i of
+              Nothing -> "remove it."
+              (Just t) -> sanitize t
+          showIdeaCheckstyle idea = "<error line='" ++ hintLn idea ++
+            "' severity='" ++ hintSev idea ++ "' message='" ++ ideaHint idea ++
+            ". Found " ++ sanitize (ideaFrom idea) ++ ". Why not " ++ hintTo idea ++ "' source='HLint'/>"
+
+showIdeasCheckstyle :: [Idea] -> String
+showIdeasCheckstyle ideas = concat
+    [ "<?xml version='1.0' encoding='UTF-8'?>\n"
+    , "<checkstyle version='5.0'>\n"
+    , showByFile ideas
+    , "</checkstyle>"
+    ]
+    where showByFile [] = ""
+          showByFile xs = (concatMap showFileCheckstyle . groupedByFile) xs
+          groupedByFile = let f = srcSpanFilename . ideaSpan
+                          in groupBy ((==) `on` f) . sortBy (comparing f)
+
 instance Show Idea where
     show = showEx id
-
 
 showANSI :: IO (Idea -> String)
 showANSI = do

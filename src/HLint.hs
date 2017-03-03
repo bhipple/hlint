@@ -129,7 +129,6 @@ readAllSettings cmd@CmdMain{..} flags = do
     settings4 <- return [SettingClassify $ Classify Ignore x "" "" | x <- cmdIgnore]
     return $ settings1 ++ settings2 ++ settings3 ++ settings4
 
-
 runHints :: Cmd -> ParseFlags -> IO [Idea]
 runHints cmd@CmdMain{..} flags = do
     j <- if cmdThreads == 0 then getNumProcessors else return cmdThreads
@@ -139,13 +138,15 @@ runHints cmd@CmdMain{..} flags = do
         ideas <- getIdeas cmd settings flags
         let (showideas,hideideas) = partition (\i -> cmdShowAll || ideaSeverity i /= Ignore) ideas
         if cmdJson then
-            putStrLn $ showIdeasJson showideas
-         else if cmdSerialise then do
-            hSetBuffering stdout NoBuffering
-            print $ map (show &&& ideaRefactoring) showideas
-         else if cmdRefactor then
-            handleRefactoring showideas cmdFiles cmd
-         else do
+            putStrLn . showIdeasJson $ showideas
+        else if cmdCheckstyleXml then
+            putStrLn . showIdeasCheckstyle $ showideas
+        else if cmdSerialise then do
+          hSetBuffering stdout NoBuffering
+          print $ map (show &&& ideaRefactoring) showideas
+        else if cmdRefactor then
+          handleRefactoring showideas cmdFiles cmd
+        else do
             usecolour <- cmdUseColour cmd
             showItem <- if usecolour then showANSI else return show
             mapM_ (outStrLn . showItem) showideas

@@ -1,0 +1,40 @@
+---------------------------------------------------------------------
+RUN tests/checkstyle.hs --checkstyle-xml
+FILE tests/checkstyle.hs
+foo = (+1)
+bar x = foo x
+baz = getLine >>= return . map toUpper
+
+OUTPUT
+<?xml version='1.0' encoding='UTF-8'?>
+<checkstyle version='5.0'>
+<file name='tests/checkstyle.hs'>
+<error line='2' severity='warning' message='Eta reduce. Found bar x = foo x. Why not bar = foo' source='HLint'/>
+<error line='3' severity='info' message='Use fmap. Found getLine >>= return . map toUpper. Why not fmap (map toUpper) getLine' source='HLint'/>
+</file>
+</checkstyle>
+
+---------------------------------------------------------------------
+RUN tests/directory --checkstyle-xml
+FILE tests/directory/File1.hs
+ foo = map f . map g
+FILE tests/directory/File2.hs
+ foo = x ++ (y)
+ bar = do putStrLn "hello"
+FILE tests/directory/File3.hs
+  hasQuote str = filter (eq 'a') str
+
+OUTPUT
+<?xml version='1.0' encoding='UTF-8'?>
+<checkstyle version='5.0'>
+<file name='tests/directory/File1.hs'>
+<error line='1' severity='info' message='Use map once. Found map f . map g. Why not map (f . g)' source='HLint'/>
+</file>
+<file name='tests/directory/File2.hs'>
+<error line='1' severity='warning' message='Redundant bracket. Found (y). Why not y' source='HLint'/>
+<error line='2' severity='warning' message='Redundant do. Found do putStrLn "hello". Why not putStrLn "hello"' source='HLint'/>
+</file>
+<file name='tests/directory/File3.hs'>
+<error line='1' severity='warning' message='Eta reduce. Found hasQuote str = filter (eq \'a\') str. Why not hasQuote = filter (eq \'a\')' source='HLint'/>
+</file>
+</checkstyle>

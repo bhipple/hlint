@@ -71,7 +71,7 @@ instance Default ColorMode where
 
 data Cmd
     = CmdMain
-        {cmdFiles :: [FilePath]    -- ^ which files to run it on, nothing = none given
+        {cmdFiles :: [FilePath]          -- ^ which files to run it on, nothing = none given
         ,cmdReports :: [FilePath]        -- ^ where to generate reports
         ,cmdGivenHints :: [FilePath]     -- ^ which settignsfiles were explicitly given
         ,cmdWithHints :: [String]        -- ^ hints that are given on the command line
@@ -80,9 +80,9 @@ data Cmd
         ,cmdIgnore :: [String]           -- ^ the hints to ignore
         ,cmdShowAll :: Bool              -- ^ display all skipped items
         ,cmdExtension :: [String]        -- ^ extensions
-        ,cmdLanguage :: [String]      -- ^ the extensions (may be prefixed by "No")
+        ,cmdLanguage :: [String]         -- ^ the extensions (may be prefixed by "No")
         ,cmdUtf8 :: Bool
-        ,cmdEncoding :: String         -- ^ the text encoding
+        ,cmdEncoding :: String           -- ^ the text encoding
         ,cmdCross :: Bool                -- ^ work between source files, applies to hints such as duplicate code between modules
         ,cmdFindHints :: [FilePath]      -- ^ source files to look for hints in
         ,cmdDataDir :: FilePath          -- ^ the data directory
@@ -93,6 +93,7 @@ data Cmd
         ,cmdCppSimple :: Bool
         ,cmdCppAnsi :: Bool
         ,cmdJson :: Bool                -- ^ display hint data as JSON
+        ,cmdCheckstyleXml :: Bool       -- ^ display hint data as checkstyle xml
         ,cmdNoSummary :: Bool           -- ^ do not show the summary info
         ,cmdOnly :: [String]            -- ^ specify which hints explicitly
         ,cmdNoExitCode :: Bool
@@ -102,12 +103,12 @@ data Cmd
         ,cmdWithRefactor :: FilePath    -- ^ Path to refactor tool
         }
     | CmdGrep
-        {cmdFiles :: [FilePath]    -- ^ which files to run it on, nothing = none given
+        {cmdFiles :: [FilePath]         -- ^ which files to run it on, nothing = none given
         ,cmdPattern :: String
-        ,cmdExtension :: [String]        -- ^ extensions
-        ,cmdLanguage :: [String]      -- ^ the extensions (may be prefixed by "No")
+        ,cmdExtension :: [String]       -- ^ extensions
+        ,cmdLanguage :: [String]        -- ^ the extensions (may be prefixed by "No")
         ,cmdUtf8 :: Bool
-        ,cmdEncoding :: String         -- ^ the text encoding
+        ,cmdEncoding :: String          -- ^ the text encoding
         ,cmdPath :: [String]
         ,cmdCppDefine :: [String]
         ,cmdCppInclude :: [FilePath]
@@ -127,7 +128,7 @@ data Cmd
         }
     | CmdHSE
         {cmdFiles :: [FilePath]
-        ,cmdLanguage :: [String]      -- ^ the extensions (may be prefixed by "No")
+        ,cmdLanguage :: [String]         -- ^ the extensions (may be prefixed by "No")
         }
     deriving (Data,Typeable,Show)
 
@@ -155,6 +156,7 @@ mode = cmdArgsMode $ modes
         ,cmdCppSimple = nam_ "cpp-simple" &= help "Use a simple CPP (strip # lines)"
         ,cmdCppAnsi = nam_ "cpp-ansi" &= help "Use CPP in ANSI compatibility mode"
         ,cmdJson = nam_ "json" &= help "Display hint data as JSON"
+        ,cmdCheckstyleXml = nam_ "checkstyle-xml" &= help "Display hint data as Checkstyle XML"
         ,cmdNoSummary = nam_ "no-summary" &= help "Do not show summary information"
         ,cmdOnly = nam "only" &= typ "HINT" &= help "Specify which hints explicitly"
         ,cmdNoExitCode = nam_ "no-exit-code" &= help "Do not give a negative exit if hints"

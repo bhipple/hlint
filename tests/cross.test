@@ -12,7 +12,7 @@ bar = 1
         c = 3
 
 FILE tests/cross.hs2
-        
+
 module A where
 
 foo = 1
